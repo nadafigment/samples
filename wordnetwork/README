@@ -1,0 +1,34 @@
+This was a problem posed by a prospective employer. They were open to
+different languages for that, so i wrote up the python solution, as i
+knew i could do that pretty quickly. I suspected the job wouldn't be an ideal
+fit, so i didn't want to spend too long on it. But i did want to
+provide code which gave a bit of insight into my thought processes as
+i was writing it, and also gave some ideas of what my style is, what
+my priorities are, etc. So i wrote the code, but i left in some
+debugging and thought-process type comments in there -- something like
+# I like testing, so i'm leaving this testing line in, but commented out
+# test_run(test_parameters)
+There was a place or two where i made a debatable choice, and these i
+commented too, along with reasoning for that choice. Alas, the place
+rejected me, saying that i had too many comments (!), and made some
+questionable choices.
+
+Ah well, i guess it's probably true that it wouldn't have been a good
+fit. It was a good exercise for me, and hey, at least that actually
+read the code (wrote some for another job application, all they cared
+about was that it worked and i don't think ever looked at the code)
+
+It was a good exercise. First approach was python, but i needed to
+scrape the rust off of my C/C++, so i did it there as well.
+
+The spec is this:
+
+Two words are friends if they have a Levenshtein distance of 1. That
+is, you can add, remove, or substitute exactly one letter in word X to
+create word Y. A word’s social network consists of all of its friends,
+plus all of their friends, and all of their friends' friends, and so
+on. Write a program to tell us how big the social network for the word
+"causes" is,  using this word list.
+
+This is the wikipedia entry on Levenshtein distance:
+http://en.wikipedia.org/wiki/Levenshtein_distance
