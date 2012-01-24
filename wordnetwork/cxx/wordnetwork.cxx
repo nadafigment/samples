@@ -32,21 +32,9 @@ void free_words(WordList &words)
 
 int main (int argc, char *argv[])
 {
-    /*
-    Word a("cat");
-    Word b("bat");
-    Word c("feek");
-    Word d("gap");
-
-    cout << a.levenshtein_distance(b) << endl;
-    cout << b.levenshtein_distance(c) << endl;
-    cout << a.levenshtein_distance(d) << endl;
-    */
-    
     if (argc < 2)
     {
-        fprintf(stdout, "Usage: %s <word_to_check <wordfile>\n",
-                argv[0]);
+        cerr << "Usage: " << argv[0] << " <word_to_check <wordfile>" << endl;
         return 1;
     }
 
@@ -88,6 +76,10 @@ int main (int argc, char *argv[])
 
     if (preprocess_all_words)
     {
+        // This method goes through all of the words in our list
+        // and first generates the network for each of them
+        // It's sort of bullet-proof, and would be good if we needed
+        // all of those values for other stuff later
         WordList::iterator iter;
         for (iter = all_words.begin(); iter != all_words.end(); ++iter)
         {
@@ -98,6 +90,8 @@ int main (int argc, char *argv[])
     }
     else
     {
+        // This method just builds up the newtork from the start word.
+        // We don't need to generate more than these
         start_word->generate_social_network(network, all_words);
     }
 

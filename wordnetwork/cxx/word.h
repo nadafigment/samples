@@ -40,6 +40,12 @@ class Word
     friend std::ostream &operator<<(std::ostream &os, const Word &word);
 
   private:
+    // private copy constructor means we can't have copies. That's good,
+    // as this could be a dangerous and/or expensive operation. We'll force
+    // clients to only create one Word (it's the friend network that's
+    // dangerous/slow -- when you copy a Word, is it a deep or shallow copy?)
+    Word(const Word &rhs);
+    
     std::string m_word;
     WordList m_friends;
     StringSet m_friend_names;
