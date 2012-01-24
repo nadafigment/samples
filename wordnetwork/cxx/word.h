@@ -3,14 +3,17 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <queue>
+
 #include <ostream>
 
 // forward declare for typedef
 class Word;
 
-typedef std::vector<Word> WordList;
+typedef std::vector<Word*> WordList;
 typedef std::vector<std::string> StringList;
 typedef std::set<std::string> StringSet;
+typedef std::queue<Word*> WordQueue;
 
 class Word
 {
@@ -25,7 +28,9 @@ class Word
 
     bool can_be_friends_with(const Word &word);
 
-    void add_friend(Word &word);
+    void add_friend(Word *word);
+
+    void fill_network(StringSet &network);
 
     void generate_social_network(StringSet &network, WordList &all_words);
 
@@ -34,8 +39,9 @@ class Word
 
     friend std::ostream &operator<<(std::ostream &os, const Word &word);
 
-  protected:
+  private:
     std::string m_word;
     WordList m_friends;
+    StringSet m_friend_names;
     bool m_built_network;
 };

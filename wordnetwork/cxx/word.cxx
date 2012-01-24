@@ -55,46 +55,56 @@ void Word::build_friend_network(WordList &words)
 
     if (!m_built_network)
     {       
-        cout << "building network for '" << m_word << "'" << endl;
         WordList::iterator iter;
         for (iter = words.begin(); iter != words.end(); ++iter)
         {
-            if (can_be_friends_with(*iter))
+            if (can_be_friends_with(**iter))
                 add_friend(*iter);
-
-            m_built_network = true;
         }
+
+        m_built_network = true;
     }
 }
 
-void Word::add_friend(Word &word)
+void Word::add_friend(Word *word)
 {
-    m_friends.push_back(word);
-    // this is a symmetrical relationship, no?
-    word.add_friend(*this);
+    if (m_friend_names.find(word->m_word) == m_friend_names.end())
+    {
+        m_friends.push_back(word);
+        m_friend_names.insert(word->m_word);
+
+        // this is a symmetrical relationship, no?
+        // add it other direction. We don't really want to call add_friend on
+        // that other word as it'll slow us down, though would be more elegant
+        word->m_friends.push_back(this);
+        word->m_friend_names.insert(m_word);
+    }
 }
 
 bool Word::can_be_friends_with(const Word &word)
 {
     if (levenshtein_distance(word) == 1)
-    {
-        cout << "<" << *this << ">, <" << word << ">" << endl;       
         return true;
-    }
     else
         return false;
 }
 
+void Word::fill_network(StringSet &network)
+{
+    network.insert(m_word);
+    
+    WordList::iterator iter;
+    for (iter = m_friends.begin(); iter != m_friends.end(); ++iter)
+    {
+        if (network.find((*iter)->m_word) == network.end())
+        {
+            (*iter)->fill_network(network);
+        }
+    }
+}
+
 int Word::levenshtein_distance(const Word &word)
 {
-    //if (word.m_word.length() != m_word.length())
-    //    return 0;
-
-    //if (word.m_word == m_word)
-    //    return 0;
-
-    // i don't really like using non-descriptive variable names
-    // like 'm' but this is coming straight from the ref at wikipedia
     const int m = m_word.length();
     const int n = word.m_word.length();
 
@@ -124,25 +134,26 @@ int Word::levenshtein_distance(const Word &word)
 
 void Word::generate_social_network(StringSet &network_set, WordList &all_words)
 {
-    /*
-      the main entry point for building a FriendlyWord's social network
-      
-      Note: this will be slow! O(n^2) in worst case (where n is length of all_words)
-    */
-    // add ourself
-    network_set.insert(m_word);
+    WordQueue queue;
 
-    //assume that we haven't built our network already. There are checks in that
-    // method to make sure it doesn't run numerous times, but the way we've structured
-    // things here (checking if friends are already in the set before recursing) this
-    // shouldn't ever happen
-    build_friend_network(all_words);
-
-    WordList::iterator iter;
-    for (iter = m_friends.begin(); iter != m_friends.end(); ++iter)
+    queue.push(this);
+    Word *word;
+    
+    while (!queue.empty())
     {
-        cout << "checking out " << *iter << endl;
-        if (network_set.find((*iter).m_word) != network_set.end())
-            (*iter).generate_social_network(network_set, all_words);
+        word = queue.front();
+        queue.pop();
+        word->build_friend_network(all_words);
+
+        if (network_set.find(word->m_word) == network_set.end())
+        {
+            network_set.insert(word->m_word);
+
+            WordList::iterator iter;
+            for (iter = word->m_friends.begin(); iter != word->m_friends.end(); ++iter)
+            {
+                queue.push(*iter);
+            }
+        }
     }
 }

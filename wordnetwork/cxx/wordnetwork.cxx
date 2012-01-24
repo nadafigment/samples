@@ -21,6 +21,15 @@
 // dangerous and hard-to-find errors in real world scenarios
 using namespace std;
 
+void free_words(WordList &words)
+{
+    WordList::iterator iter;
+    for (iter = words.begin(); iter != words.end(); ++iter)
+    {
+        delete *iter;
+    }
+}
+
 int main (int argc, char *argv[])
 {
     /*
@@ -44,7 +53,7 @@ int main (int argc, char *argv[])
     string word_to_check(argv[1]);
 
     string line;
-    Word start_word;
+    Word *start_word = NULL;
     WordList all_words;
 
     ifstream wordfile(argv[2]);
@@ -56,7 +65,7 @@ int main (int argc, char *argv[])
             line.erase(remove(line.begin(), line.end(), '\n'), line.end());
             if (!line.empty())
             {
-                Word word(line);
+                Word *word = new Word(line);
                 if (line == argv[1])
                     start_word = word;
                 all_words.push_back(word);
@@ -64,9 +73,10 @@ int main (int argc, char *argv[])
         }
     }
 
-    if (start_word.empty())
+    if (!start_word)
     {
         cerr << "Could not find '" << argv[1] << "' in word list file!" << endl;
+        free_words(all_words);
         return 2;
     }
 
@@ -74,21 +84,40 @@ int main (int argc, char *argv[])
 
     StringSet network;
 
-    //sleep(1);
+    bool preprocess_all_words = false;
 
-    start_word.generate_social_network(network, all_words);
+    if (preprocess_all_words)
+    {
+        WordList::iterator iter;
+        for (iter = all_words.begin(); iter != all_words.end(); ++iter)
+        {
+            (*iter)->build_friend_network(all_words);
+        }
+
+        start_word->fill_network(network);
+    }
+    else
+    {
+        start_word->generate_social_network(network, all_words);
+    }
+
+
+    //start_word.generate_social_network(network, all_words);
     cout << "Size is: " << network.size() << endl;
-    
+
 
     // pass in reference to that 'network' list as a reference
     // it's going to get quite large, we don't want to copy it
     //build_network(start_word, all_words);
 
-    int elapsed = (clock() - start_time) / (float) CLOCKS_PER_SEC;
-    cout << "(Full processing took " << elapsed << " secs)" << endl;
+    int elapsed_ticks = clock() - start_time;
+    float elapsed_secs = elapsed_ticks / (float) CLOCKS_PER_SEC;
+    cout << "(Full processing took " << elapsed_secs << " secs)" << endl;
 
     //print "social network of '%s' (inclusive) consists of %d unique words" \
     //    % (start_word.word, len(network_set))
 
+    free_words(all_words);
+    
     return 0;
 }
