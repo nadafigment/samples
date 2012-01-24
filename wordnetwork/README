@@ -1,25 +1,24 @@
 This was a problem posed by a prospective employer. They were open to
 different languages for that, so i wrote up the python solution, as i
-knew i could do that pretty quickly. I suspected the job wouldn't be an ideal
-fit, so i didn't want to spend too long on it. But i did want to
-provide code which gave a bit of insight into my thought processes as
-i was writing it, and also gave some ideas of what my style is, what
-my priorities are, etc. So i wrote the code, but i left in some
-debugging and thought-process type comments in there -- something like
-# I like testing, so i'm leaving this testing line in, but commented out
-# test_run(test_parameters)
-There was a place or two where i made a debatable choice, and these i
-commented too, along with reasoning for that choice. Alas, the place
-rejected me, saying that i had too many comments (!), and made some
-questionable choices.
+knew i could do that pretty quickly. And I didn't really want to spend
+a long time on it -- the job was a bit of a stretch in both
+directions. But i did want to provide code which gave some insight
+into my thought processes and 'style of approach' in how to solve such
+a problem; thus i left fairly detailed comments within the python
+code. (Alas, one of the complaints about my solution: too many
+comments)
 
-Ah well, i guess it's probably true that it wouldn't have been a good
-fit. It was a good exercise for me, and hey, at least that actually
-read the code (wrote some for another job application, all they cared
-about was that it worked and i don't think ever looked at the code)
+Needed to scrape some rust off of my C/C++ too, so I adapted the
+solution to C++. The python version uses recursion, but as these
+networks can get quite massive probably isn't an ideal choice. So for
+the C++ method i adapted that to simply iterate (using a stack or
+queue method -- put the first element on the queue, then while that
+queue is not empty, pop, take children/friends/whatever and put them
+on the queue). The C++ version is a little more 'complete' -- eg i
+fleshed out the entire levenshtein_distance function, instead of just
+using the shortcut i used in python -- but i haven't bothered with the
+comments this time (having duly learned my lesson!)
 
-It was a good exercise. First approach was python, but i needed to
-scrape the rust off of my C/C++, so i did it there as well.
 
 The spec is this:
 
@@ -27,8 +26,11 @@ Two words are friends if they have a Levenshtein distance of 1. That
 is, you can add, remove, or substitute exactly one letter in word X to
 create word Y. A word’s social network consists of all of its friends,
 plus all of their friends, and all of their friends' friends, and so
-on. Write a program to tell us how big the social network for the word
-"causes" is,  using this word list.
+on. Write a program to tell us how big the social network for a given
+word is.
 
 This is the wikipedia entry on Levenshtein distance:
 http://en.wikipedia.org/wiki/Levenshtein_distance
+
+Word files can be found in the 'data' subdir, or generate your own --
+one word per line.
