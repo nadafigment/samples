@@ -1,0 +1,4 @@
+This is built from the "official" Android Notepad tutorial. I've
+modified it to be much more streamlined. Why do we need an offical
+confirm or save button -- it should always be saved. Title is taken
+from the first line.
