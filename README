@@ -4,7 +4,9 @@ Still in the early days of this repository, but starting to flesh this
 out with some samples of my work. Hopefully it gives you an idea of my
 style and how i write code.
 
-Right now it's a mix of python and C++ -- separate dirs for different
+Right now it's a mix of python, C++, and Java/Android. Where these are
+intermixed, there will be eparate dirs for the different
 languages underneath top-level topic dirs. python should run with
 python 2.5+, and probably works with 3 but i haven't tested. C++ projects
 should work with most any compiler, and have (minimal) cmake setups.
+NadaNote is currently the only Java/Android sample in here.
