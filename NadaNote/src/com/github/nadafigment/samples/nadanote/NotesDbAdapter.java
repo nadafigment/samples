@@ -185,4 +185,5 @@ public class NotesDbAdapter {
 
         return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }
+    
 }

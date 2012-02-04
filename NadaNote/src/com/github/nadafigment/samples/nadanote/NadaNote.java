@@ -2,9 +2,13 @@
 package com.github.nadafigment.samples.nadanote;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,10 +21,16 @@ public class NadaNote extends Activity {
 
 	private static final int CREATE_ID = Menu.FIRST;
     private static final int OPEN_ID = Menu.FIRST + 1;    
+    
+    public static final String KEY_LAST_NOTE = "last_note";
 
+    // we shouldn't really do this, but this is just for debugging, logging etc
+    public static final String APP_TAG = "NadaNote";
+    
     private EditText mBodyText;
     private Long mRowId;
     private NotesDbAdapter mDbHelper;
+    private SharedPreferences mPrefs;
 
     /** Called when the activity is first created. */
     @Override
@@ -32,22 +42,28 @@ public class NadaNote extends Activity {
         
         setContentView(R.layout.note_edit);
         setTitle(R.string.edit_note);
+        
+        mPrefs = getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
 
         mBodyText = (EditText) findViewById(R.id.body);
 
         mRowId = null;
-        if (savedInstanceState == null) {
-        	//mRowId = mDbHelper.getLastNoteId();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+        	long rowid = extras.getLong(NotesDbAdapter.KEY_ROWID);
+        	mRowId = rowid == -1 ? null : rowid;
+        	Log.i(APP_TAG, "got bundle in create " + rowid);
         }
         else {
-            mRowId = (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
-        }
-        
-        if (mRowId == null) {
-            Bundle extras = getIntent().getExtras();
-            mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
-                                    : null;
-        }
+        	if (savedInstanceState == null) {
+        		long lastRow = mPrefs.getLong(KEY_LAST_NOTE, -1);
+        		mRowId = lastRow == -1 ? null : lastRow;
+        	}
+        	else {
+        		mRowId = (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
+        	}
+        }        
+        Log.i(APP_TAG, "OnCreate called, with mRowId: " + mRowId);
         
         populateFields();
         
@@ -73,10 +89,21 @@ public class NadaNote extends Activity {
     
 	private void populateFields() {
         if (mRowId != null) {
-            Cursor note = mDbHelper.fetchNote(mRowId);
-            startManagingCursor(note);
-            mBodyText.setText(note.getString(
-                    note.getColumnIndexOrThrow(NotesDbAdapter.KEY_BODY)));
+        	try {
+        		Cursor note = mDbHelper.fetchNote(mRowId);
+        		startManagingCursor(note);
+        		mBodyText.setText(note.getString(
+        				note.getColumnIndexOrThrow(NotesDbAdapter.KEY_BODY)));
+        		Log.i(APP_TAG, "Opened note " + mRowId);
+        	}
+        	catch (Exception e) {
+        		
+        		Log.e(APP_TAG, "Could not find note " + mRowId);
+        		Log.wtf(APP_TAG, Log.getStackTraceString(e));
+        		
+        		mRowId = null;
+        		mBodyText.setText("");
+        	}
         }
         else {
         	mBodyText.setText("");
@@ -92,8 +119,13 @@ public class NadaNote extends Activity {
     
     @Override
     protected void onPause() {
-    	saveState();
         super.onPause();
+        
+        saveState();
+        
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putLong(KEY_LAST_NOTE, mRowId);
+        ed.commit();
     }
     
     @Override

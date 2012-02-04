@@ -91,6 +91,7 @@ public class NotePicker extends ListActivity {
 
     private void createNote() {
         Intent i = new Intent(this, NadaNote.class);
+        i.putExtra(NotesDbAdapter.KEY_ROWID, -1);
         startActivity(i);
     }
 
