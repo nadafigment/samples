@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.github.nadafigment.samples.nadanote">
+          
+    <uses-sdk android:minSdkVersion="10" />
+    
     <application android:icon="@drawable/icon">
         <activity android:name=".NadaNote"
                   android:label="@string/app_name">
@@ -9,6 +12,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".NoteEdit" />
+        <activity android:name=".NotePicker" />
     </application>
 </manifest> 
