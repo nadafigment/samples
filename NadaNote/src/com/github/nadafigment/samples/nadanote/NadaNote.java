@@ -10,15 +10,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.EditText;
-import android.widget.SimpleCursorAdapter;
 
 public class NadaNote extends Activity {
-    private static final int CREATE_ID = Menu.FIRST;
-    private static final int OPEN_ID = Menu.FIRST + 1;
-    private static final int DELETE_ID = Menu.FIRST + 2;
-    
+	private static final int ACTIVITY_OPEN=1;
+
+	private static final int CREATE_ID = Menu.FIRST;
+    private static final int OPEN_ID = Menu.FIRST + 1;    
 
     private EditText mBodyText;
     private Long mRowId;
@@ -37,8 +35,14 @@ public class NadaNote extends Activity {
 
         mBodyText = (EditText) findViewById(R.id.body);
 
-        mRowId = (savedInstanceState == null) ? null :
-            (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
+        mRowId = null;
+        if (savedInstanceState == null) {
+        	//mRowId = mDbHelper.getLastNoteId();
+        }
+        else {
+            mRowId = (Long) savedInstanceState.getSerializable(NotesDbAdapter.KEY_ROWID);
+        }
+        
         if (mRowId == null) {
             Bundle extras = getIntent().getExtras();
             mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
@@ -48,8 +52,6 @@ public class NadaNote extends Activity {
         populateFields();
         
         updateFromData();
-        
-        //registerForContextMenu(getListView());
         
         mBodyText.setOnKeyListener(new OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -90,8 +92,8 @@ public class NadaNote extends Activity {
     
     @Override
     protected void onPause() {
+    	saveState();
         super.onPause();
-        saveState();
     }
     
     @Override
@@ -136,25 +138,9 @@ public class NadaNote extends Activity {
     	return title;
     }
 
-    private void fillData() {
-        // Get all of the rows from the database and create the item list
-        Cursor notesCursor = mDbHelper.fetchAllNotes();
-        startManagingCursor(notesCursor);
-
-        // Create an array to specify the fields we want to display in the list (only TITLE)
-        String[] from = new String[]{NotesDbAdapter.KEY_TITLE};
-
-        // and an array of the fields we want to bind those fields to (in this case just text1)
-        int[] to = new int[]{R.id.text1};
-
-        // Now create a simple cursor adapter and set it to display
-        SimpleCursorAdapter notes = 
-            new SimpleCursorAdapter(this, R.layout.notes_row, notesCursor, from, to);
-        //setListAdapter(notes);
-    }
-    
     public void onDataChanged() {
-    	// eventually we'd start a timer so we don't do this all at once. But for now, just call
+    	// eventually we'd start a timer so we don't do this 
+    	// all at once. But for now, just call
     	dataChanged();
     }
     
@@ -170,6 +156,7 @@ public class NadaNote extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+    	saveState();
         super.onCreateOptionsMenu(menu);
         menu.add(0, CREATE_ID, 0, R.string.menu_create);
         menu.add(0, OPEN_ID, 0, R.string.menu_open);
@@ -185,12 +172,8 @@ public class NadaNote extends Activity {
                 createNote();
                 return true;
             case OPEN_ID:
+            	openNote();
             	return true;
-            case DELETE_ID:
-                AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-                mDbHelper.deleteNote(info.id);
-                fillData();
-                return true;
         }
 
         return super.onMenuItemSelected(featureId, item);
@@ -202,33 +185,30 @@ public class NadaNote extends Activity {
     	updateFromData();
     }
     
-    private void openNote(long id) {
-    	mRowId = id;
-    	populateFields();
-    	updateFromData();
+    private void openNote() {
+    	Intent i = new Intent(this, NotePicker.class);
+        startActivityForResult(i, ACTIVITY_OPEN);
     }
 
-    /*
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        openNote(id);
-    }
-    */
-    
-
-    /* (non-Javadoc)
-	 * @see android.app.Activity#registerForContextMenu(android.view.View)
-	 */
 	@Override
 	public void registerForContextMenu(View view) {
 		super.registerForContextMenu(view);
 	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (ACTIVITY_OPEN == requestCode) {
+			if (RESULT_OK == resultCode) {
+				Bundle extras = data.getExtras();
+				mRowId = extras != null ? extras.getLong(NotesDbAdapter.KEY_ROWID)
+										: null;
+       
+				populateFields();
+				updateFromData();
+			}
+		}
+	}
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        fillData();
-    }
 }
