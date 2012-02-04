@@ -9,4 +9,5 @@
     <string name="body">Body</string>
     <string name="confirm">Confirm</string>
     <string name="edit_note">Edit Note</string>
+    <string name="pick_note">Select a Note</string>
 </resources>
